@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { ReqeustLink } from "./dto/requestlink.dto";
 import { ClientInfoDecorator } from "src/common/decorators/client-info.decorator";
@@ -23,14 +23,13 @@ export class AuthController{
         )
     }
 
-    @Post('/verify-authlink')
+    @Get('/verify-authlink')
     VerifyAuthLink(
-        @Body() dto: VerifyLink,
+        @Query("token") token: string,
         @ClientInfoDecorator() client: ClientInfo,
     ) {
         return this.authService.verifyAuthLink(
-            dto.email,
-            dto.token,
+            token,
             client.ipAddress,
             client.userAgent
         )

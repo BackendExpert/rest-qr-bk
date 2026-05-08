@@ -121,40 +121,38 @@ export class AuthService {
     }
 
     async verifyAuthLink(
-        email: string,
         token: string,
         ipAddress?: string,
         userAgent?: string,
     ) {
+
         const authlink = await this.authlinkModel.findOne({
-            email,
             used: false,
-            expiresAt: {
-                $gt: new Date()
-            }
-        })
+            expiresAt: { $gt: new Date() }
+        });
 
         if (!authlink) {
-            throw new ConflictException("Invalid or expired auth link")
+            throw new ConflictException("Invalid or expired auth link");
         }
+
         const isValidToken = CompareAuthToken(
             token,
             authlink.tokenHash,
         );
 
+        if (!isValidToken) {
+            throw new ConflictException("Invalid or expired auth link");
+        }
 
         const user = await this.userModel
-            .findOne({ email })
+            .findOne({ email: authlink.email })
             .populate("role");
 
         if (!user) {
-            throw new NotFoundException(
-                "User not found",
-            );
+            throw new NotFoundException("User not found");
         }
 
         authlink.used = true;
-
         await authlink.save();
 
         user.last_login = new Date();
@@ -165,33 +163,26 @@ export class AuthService {
 
         await user.save();
 
-        const accessToken =
-            await this.jwtService.signAsync({
-                sub: user._id,
-                email: user.email,
-                role: (user.role as any)?.role,
-            });
+        const accessToken = await this.jwtService.signAsync({
+            sub: user._id,
+            email: user.email,
+            role: (user.role as any)?.role,
+        });
 
-        const location = getLocationFromIP(
-            ipAddress || "",
-        );
+        const location = getLocationFromIP(ipAddress || "");
 
-        await createAuditLog(
-            this.auditlogModel,
-            {
-                user: user._id,
-                action: "LOGIN_SUCCESS",
-                description:
-                    `User logged in successfully`,
+        await createAuditLog(this.auditlogModel, {
+            user: user._id,
+            action: "LOGIN_SUCCESS",
+            description: "User logged in successfully via magic link",
+            ipAddress,
+            userAgent,
+            metadata: {
                 ipAddress,
                 userAgent,
-                metadata: {
-                    ipAddress,
-                    userAgent,
-                    location,
-                },
+                location,
             },
-        );
+        });
 
         return {
             success: true,
