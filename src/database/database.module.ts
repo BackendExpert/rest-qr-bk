@@ -13,14 +13,6 @@ import { ConfigService } from '@nestjs/config';
                 uri: config.get<string>('MONGO_URI'),
             }),
         }),
-
-        MongooseModule.forRootAsync({
-            connectionName: 'server',
-            inject: [ConfigService],
-            useFactory: (config: ConfigService) => ({
-                uri: config.get<string>('SERVER_MONGO_URI')
-            })
-        })
     ],
 
     exports: [MongooseModule]

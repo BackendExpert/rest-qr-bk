@@ -23,14 +23,14 @@ export class EmailService {
             from: `"${projectName}" <${this.configService.get<string>("EMAIL_USER")}>`,
             to: email,
             subject: `${projectName} - Your OTP Code`,
-            text: `Your OTP is ${otp}. It expires in 5 minutes. Requested from IP: ${ipAddress}, Device: ${userAgent}`,
+            text: `Your Auth Link is ${otp}. It expires in 10 minutes. Requested from IP: ${ipAddress}, Device: ${userAgent}`,
             html: `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
           <div style="background: #4f46e5; color: white; padding: 20px; text-align: center;">
             <h1 style="margin: 0; font-size: 24px;">${projectName}</h1>
           </div>
           <div style="padding: 30px; text-align: center; background: #f9fafb;">
-            <h2 style="color: #111827;">Your OTP Code</h2>
+            <h2 style="color: #111827;">Your Auth Link</h2>
             <p style="color: #6b7280;">Enter the following code to complete your action:</p>
             <div style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #4f46e5; margin: 20px 0;">${otp}</div>
             <p style="color: #ef4444; font-weight: bold;">This code expires in 5 minutes.</p>

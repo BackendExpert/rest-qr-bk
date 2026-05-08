@@ -36,10 +36,6 @@ export class AuthLink {
 
     @Prop()
     userAgent?: string;
-
-    @Prop({ unique: true, required: true })
-    authlink!: string;
-
 }
 
 export const AuthLinkSchema = SchemaFactory.createForClass(AuthLink)
