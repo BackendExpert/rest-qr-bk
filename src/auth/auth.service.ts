@@ -14,7 +14,7 @@ import { User, UserDocument } from "src/user/schema/user.schema";
 import { AuthLink, AuthLinkDocument } from "./schema/authlink.schema";
 
 import { EmailService } from "src/common/utils/email.util";
-import { GenerateAuthLink } from "src/common/utils/authlink.util";
+import { GenerateAuthLink, CompareAuthToken } from "src/common/utils/authlink.util";
 import { getLocationFromIP } from "src/common/utils/location";
 import { createAuditLog } from "src/common/utils/auditlogs.util";
 
@@ -117,6 +117,86 @@ export class AuthService {
         return {
             success: true,
             message: "If the email is valid, a login link has been sent.",
+        };
+    }
+
+    async verifyAuthLink(
+        email: string,
+        token: string,
+        ipAddress?: string,
+        userAgent?: string,
+    ) {
+        const authlink = await this.authlinkModel.findOne({
+            email,
+            used: false,
+            expiresAt: {
+                $gt: new Date()
+            }
+        })
+
+        if (!authlink) {
+            throw new ConflictException("Invalid or expired auth link")
+        }
+        const isValidToken = CompareAuthToken(
+            token,
+            authlink.tokenHash,
+        );
+
+
+        const user = await this.userModel
+            .findOne({ email })
+            .populate("role");
+
+        if (!user) {
+            throw new NotFoundException(
+                "User not found",
+            );
+        }
+
+        authlink.used = true;
+
+        await authlink.save();
+
+        user.last_login = new Date();
+
+        if (ipAddress) {
+            user.login_ip = ipAddress;
+        }
+
+        await user.save();
+
+        const accessToken =
+            await this.jwtService.signAsync({
+                sub: user._id,
+                email: user.email,
+                role: (user.role as any)?.role,
+            });
+
+        const location = getLocationFromIP(
+            ipAddress || "",
+        );
+
+        await createAuditLog(
+            this.auditlogModel,
+            {
+                user: user._id,
+                action: "LOGIN_SUCCESS",
+                description:
+                    `User logged in successfully`,
+                ipAddress,
+                userAgent,
+                metadata: {
+                    ipAddress,
+                    userAgent,
+                    location,
+                },
+            },
+        );
+
+        return {
+            success: true,
+            accessToken,
+            user,
         };
     }
 }
