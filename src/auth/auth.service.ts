@@ -184,6 +184,13 @@ export class AuthService {
             },
         });
 
+        await this.emailService.NotificationEmail(
+            authlink.email,
+            "Login Success",
+            ipAddress,
+            userAgent,
+        )
+
         return {
             success: true,
             accessToken,

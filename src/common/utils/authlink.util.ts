@@ -22,7 +22,7 @@ export const GenerateAuthLink = () => {
         .digest("hex");
 
     const authLink =
-        `${process.env.BACKEND_SERVER}/api/auth/verify-authlink?token=${rawToken}`;
+        `${process.env.FRONTEND_URL}/verify-link?token=${rawToken}`;
 
     return {
         authLink,
