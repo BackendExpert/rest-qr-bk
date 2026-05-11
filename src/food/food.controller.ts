@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Headers, Patch, Post, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Headers, Param, Patch, Post, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FoodService } from "./food.service";
 import { JwtAuthGuard } from "src/common/guard/jwt-auth.guard";
 import { PermissionsGuard } from "src/common/guard/permissions.guard";
@@ -73,4 +73,38 @@ export class FoodController {
             client.userAgent
         )
     }
+
+    @Patch('/all-category')
+    @UseGuards(JwtAuthGuard, PermissionsGuard)
+    @Permissions('food:all-category')
+
+    FetchAllCategories(
+        @Headers("authorization") authHeader: string,
+    ) {
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            throw new UnauthorizedException("Invalid or missing token");
+        }
+
+        const token = authHeader.split(" ")[1];
+
+        return this.foodService.GetallCategory(token)
+    }
+
+    @Patch('/category/:id')
+    @UseGuards(JwtAuthGuard, PermissionsGuard)
+    @Permissions('food:one-category')
+
+    FetchAllCategory(
+        @Param('id') id: string,
+        @Headers('authorization') authHeader: string,
+    ) {
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            throw new UnauthorizedException("Invalid or missing token");
+        }
+
+        const token = authHeader.split(" ")[1];
+
+        return this.foodService.GetOneCategory(token, id)
+    }
+
 }

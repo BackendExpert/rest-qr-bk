@@ -92,7 +92,7 @@ export class FoodService {
             },
             { new: true }
         )
-        
+
         if (!category) {
             throw new NotFoundException("Category Not Found");
         }
@@ -109,6 +109,45 @@ export class FoodService {
         return {
             success: true,
             message: "Food Category Updated Success"
+        }
+    }
+
+    async GetallCategory(
+        token: string,
+    ) {
+        const payload = await this.jwtService.verify(token)
+        const user = await this.userModel.findOne({ email: payload.user })
+
+        if (!user) {
+            throw new NotFoundException("The User Not Found")
+        }
+
+        const categories = await this.categoryModel.find()
+
+        return {
+            success: true,
+            message: "Food Category Updated Success",
+            result: categories,
+        }
+    }
+
+    async GetOneCategory(
+        token: string,
+        id: string,
+    ) {
+        const payload = await this.jwtService.verify(token)
+        const user = await this.userModel.findOne({ email: payload.user })
+
+        if (!user) {
+            throw new NotFoundException("The User Not Found")
+        }
+
+        const category = await this.categoryModel.findById(id)
+
+        return {
+            success: true,
+            message: "Food Category Updated Success",
+            result: category,
         }
     }
 }
