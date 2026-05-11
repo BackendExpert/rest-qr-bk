@@ -8,8 +8,4 @@ export class CreateCategoryDTO {
     @IsString()
     @IsNotEmpty()
     slug!: string;
-
-    @IsOptional()
-    @IsUrl()
-    image?: string;
 }
