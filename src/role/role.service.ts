@@ -6,7 +6,7 @@ import { Model } from "mongoose";
 @Injectable()
 export class RoleService {
     constructor(
-        @InjectModel(Role.name, 'local')
+        @InjectModel(Role.name)
         private roleModel: Model<RoleDocument>,
     ) { }
 
